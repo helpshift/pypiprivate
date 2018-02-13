@@ -9,3 +9,4 @@ tmp/
 .cache/
 .coverage
 htmlcov/
+.pytest_cache/
