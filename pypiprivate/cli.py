@@ -1,3 +1,4 @@
+import os
 import argparse
 import logging
 
@@ -21,7 +22,7 @@ def log_level(verbosity):
 
 
 def cmd_publish(args):
-    config = Config(args.conf_path)
+    config = Config(args.conf_path, os.environ)
     storage = load_storage(config)
     return publish_package(args.pkg_name,
                            args.pkg_ver,

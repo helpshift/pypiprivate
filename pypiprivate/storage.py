@@ -35,8 +35,12 @@ class Storage(object):
 
 class LocalFileSystemStorage(Storage):
 
-    def __init__(self, config):
-        self.base_path = config['base_path']
+    def __init__(self, base_path):
+        self.base_path = base_path
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(config['base_path'])
 
     def join_path(self, *args):
         return os.path.join(*args)
@@ -76,14 +80,24 @@ class LocalFileSystemStorage(Storage):
 
 class AWSS3Storage(Storage):
 
-    def __init__(self, config):
-        self._config = config
-        session = boto3.Session(aws_access_key_id=config['access_key'],
-                                aws_secret_access_key=config['secret_key'])
+    def __init__(self, bucket, creds, acl, prefix=None):
+        access_key, secret_key = creds
+        session = boto3.Session(aws_access_key_id=access_key,
+                                aws_secret_access_key=secret_key)
         self.s3 = s3 = session.resource('s3')
-        self.bucket = s3.Bucket(config['bucket'])
-        self.prefix = config.get('prefix')
-        self.acl = config.get('acl', 'private')
+        self.bucket = s3.Bucket(bucket)
+        self.prefix = prefix
+        self.acl = acl
+
+    @classmethod
+    def from_config(cls, config):
+        storage_config = config.storage_config
+        env = config.env
+        bucket = storage_config['bucket']
+        prefix = storage_config.get('prefix')
+        acl = storage_config.get('acl', 'private')
+        creds = (env['PP_S3_ACCESS_KEY'], env['PP_S3_SECRET_KEY'])
+        return cls(bucket, creds, acl, prefix)
 
     def join_path(self, *args):
         return '/'.join(args)
@@ -159,8 +173,8 @@ class AWSS3Storage(Storage):
 
 def load_storage(config):
     if config.storage == 'local-filesystem':
-        return LocalFileSystemStorage(config.storage_config)
+        return LocalFileSystemStorage.from_config(config)
     elif config.storage == 'aws-s3':
-        return AWSS3Storage(config.storage_config)
+        return AWSS3Storage.from_config(config)
     else:
         raise ValueError('Unsupported storage "{0}"'.format(config.storage))
