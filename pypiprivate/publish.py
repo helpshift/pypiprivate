@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 class PackageAlreadyExists(Exception):
     pass
 
+class DistNotFound(Exception):
+    pass
 
 def _filter_pkg_dists(dists, pkg_name, pkg_ver):
     pkg_ver_str = re.sub('-', '_', pkg_ver)
@@ -23,10 +25,10 @@ def _filter_pkg_dists(dists, pkg_name, pkg_ver):
 def find_pkg_dists(project_path, dist_dir, pkg_name, pkg_ver):
     dist_dir = os.path.join(project_path, dist_dir)
     dists = _filter_pkg_dists(os.listdir(dist_dir), pkg_name, pkg_ver)
-    dists = ({'pkg': pkg_name,
+    dists = [{'pkg': pkg_name,
              'artifact': f,
               'path': os.path.join(dist_dir, f)}
-             for f in dists)
+             for f in dists]
     return dists
 
 
@@ -93,6 +95,10 @@ def publish_package(name, version, storage, project_path, dist_dir):
             'Package already published: {0}=={1}'
         ).format(name, version))
     dists = find_pkg_dists(project_path, dist_dir, name, version)
+    if not dists:
+        raise DistNotFound((
+            'No package distribution found in path {0}'
+        ).format(dist_dir))
     for dist in dists:
         upload_dist(storage, dist)
     update_pkg_index(storage, name)
