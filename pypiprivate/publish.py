@@ -2,19 +2,15 @@ import os
 import re
 import logging
 
-from .storage import PathNotFound
-
 from jinja2 import Environment
 
 
 logger = logging.getLogger(__name__)
 
 
-class PackageAlreadyExists(Exception):
-    pass
-
 class DistNotFound(Exception):
     pass
+
 
 def _filter_pkg_dists(dists, pkg_name, pkg_ver):
     pkg_ver_str = re.sub('-', '_', pkg_ver)
@@ -24,6 +20,7 @@ def _filter_pkg_dists(dists, pkg_name, pkg_ver):
 
 def find_pkg_dists(project_path, dist_dir, pkg_name, pkg_ver):
     dist_dir = os.path.join(project_path, dist_dir)
+    logger.info('Looking for package dists in {0}'.format(dist_dir))
     dists = _filter_pkg_dists(os.listdir(dist_dir), pkg_name, pkg_ver)
     dists = [{'pkg': pkg_name,
              'artifact': f,
@@ -55,14 +52,10 @@ def build_index(title, items, index_type='root'):
                            index_type=index_type)
 
 
-def is_already_published(storage, pkg_name, pkg_ver):
-    logger.info('Ensuring that the package is not already published..')
-    try:
-        dists = storage.listdir(pkg_name)
-    except PathNotFound:
-        return False
-    else:
-        return any(_filter_pkg_dists(dists, pkg_name, pkg_ver))
+def is_dist_published(storage, dist):
+    path = storage.join_path(dist['pkg'], dist['artifact'])
+    logger.info('Ensuring dist is not already published: {0}'.format(path))
+    return storage.path_exists(path)
 
 
 def upload_dist(storage, dist):
@@ -90,16 +83,24 @@ def update_root_index(storage):
 
 
 def publish_package(name, version, storage, project_path, dist_dir):
-    if is_already_published(storage, name, version):
-        raise PackageAlreadyExists((
-            'Package already published: {0}=={1}'
-        ).format(name, version))
     dists = find_pkg_dists(project_path, dist_dir, name, version)
     if not dists:
         raise DistNotFound((
             'No package distribution found in path {0}'
         ).format(dist_dir))
+    dists_uploaded = []
     for dist in dists:
-        upload_dist(storage, dist)
-    update_pkg_index(storage, name)
-    update_root_index(storage)
+        if not is_dist_published(storage, dist):
+            logger.info('Trying to publish dist: {0}'.format(dist['artifact']))
+            upload_dist(storage, dist)
+            dists_uploaded.append(dist)
+        else:
+            logger.debug((
+                'Dist already published: {0} [skipping]'
+            ).format(dist['artifact']))
+    if len(dists_uploaded) > 0:
+        logger.info('Updating index')
+        update_pkg_index(storage, name)
+        update_root_index(storage)
+    else:
+        logger.debug('No index update required as no new dists uploaded')

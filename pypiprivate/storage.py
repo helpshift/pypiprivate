@@ -5,6 +5,7 @@ import mimetypes
 import logging
 
 import boto3
+from botocore.exceptions import ClientError
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,9 @@ class Storage(object):
         raise NotImplementedError
 
     def listdir(self, path):
+        raise NotImplementedError
+
+    def path_exists(self, path):
         raise NotImplementedError
 
     def put_contents(self, contents, dest, sync=False):
@@ -53,6 +57,10 @@ class LocalFileSystemStorage(Storage):
             if e.errno == errno.ENOENT:
                 raise PathNotFound('Path {0} not found'.format(path))
             raise e
+
+    def path_exists(self, path):
+        path = self.join_path(self.base_path, path)
+        return os.path.exists(path)
 
     def ensure_dir(self, path):
         if not os.path.exists(path):
@@ -131,6 +139,18 @@ class AWSS3Storage(Storage):
         files = [f for f in files if f != '']
         dirs = [cp['Prefix'][len(s3_prefix):].rstrip('/') for cp in dir_objs]
         return files + dirs
+
+    def path_exists(self, path):
+        path = self.prefixed_path(path)
+        logger.debug('Checking if key exists: {0}'.format(path))
+        client = self.s3.meta.client
+        try:
+            client.head_object(Bucket=self.bucket.name, Key=path)
+        except ClientError as e:
+            logger.debug('Handled ClientError: {0}'.format(e))
+            return False
+        else:
+            return True
 
     @staticmethod
     def _guess_content_type(path, default='application/octet-stream'):
