@@ -1,6 +1,7 @@
 import pypiprivate.publish as pp
 
 import mock
+import pytest
 
 
 def test__filter_pkg_dists():
@@ -115,3 +116,9 @@ def test_publish_package():
     assert pp.upload_dist.call_count == 0
     assert pp.update_pkg_index.call_count == 0
     assert pp.update_root_index.call_count == 0
+
+    # When no dists are found
+    pp.find_pkg_dists = mock.Mock()
+    pp.find_pkg_dists.return_value = []
+    with pytest.raises(pp.DistNotFound):
+        pp.publish_package('abc', '0.1.0', storage, '.', 'dist')
