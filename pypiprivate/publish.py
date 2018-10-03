@@ -88,17 +88,17 @@ def publish_package(name, version, storage, project_path, dist_dir):
         raise DistNotFound((
             'No package distribution found in path {0}'
         ).format(dist_dir))
-    dists_uploaded = []
+    rebuild_index = False
     for dist in dists:
         if not is_dist_published(storage, dist):
             logger.info('Trying to publish dist: {0}'.format(dist['artifact']))
             upload_dist(storage, dist)
-            dists_uploaded.append(dist)
+            rebuild_index = True
         else:
             logger.debug((
                 'Dist already published: {0} [skipping]'
             ).format(dist['artifact']))
-    if len(dists_uploaded) > 0:
+    if rebuild_index:
         logger.info('Updating index')
         update_pkg_index(storage, name)
         update_root_index(storage)
