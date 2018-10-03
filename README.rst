@@ -12,9 +12,14 @@ discoverability are coming soon.
 It's implemented to support pluggable storage backends and the ones
 currently supported are S3 and Local file system.
 
-Note: Although the name of the project is ``pypiprivate``, it's upto
-you to ensure that the access to the storage is really private, both -
-the http endpoint and the underlying storage.
+Very Important Note
+-------------------
+
+Although the name of the project is ``pypiprivate``, it's upto you to
+ensure that the access to the storage is really private, both
+
+1. the HTTP endpoint
+2. the underlying storage backend
 
 
 Installation
@@ -28,7 +33,8 @@ extra-index-url.
 
     $ sudo pip install pypiprivate --extra-index-url=<get-this-from-ops>
 
-This will install a script ``pypi-private`` available at PATH.
+This will install a script ``pypi-private`` which will be available at
+PATH.
 
 You may choose to install it in a virtualenv, but it's recommended to
 install it globally for all users (sudo required) so that it's less
@@ -42,7 +48,7 @@ Configuration
 ``pypiprivate`` requires it's own config file, the default location
 for which is ``~/.pypi-private.cfg``. This repo also contains the
 example config file ``example.pypi-private.cfg``, which can be copied
-the home directory and modified.
+the home directory and renamed to ``.pypi-private.cfg``.
 
 For `aws-s3` type of storage backend, two environment variables
 ``PP_S3_ACCESS_KEY`` and ``PP_S3_SECRET_KEY`` are required to be set
