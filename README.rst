@@ -5,13 +5,13 @@ pypiprivate
 PyPI_-like package index or in other words, a `manual python
 repository
 <https://packaging.python.org/guides/hosting-your-own-index/>`_ backed
-by a file based storage backend.
+by a file based storage.
 
 It's implemented in a way that the storage backends are pluggable. At
 present, only `AWS S3`_ and local file system are supported but more
-can be added in future.
+implementations can be added in future.
 
-The backend can be protected behind a HTTP reverse proxy (eg. Nginx)
+The backend can be protected behind a HTTP reverse proxy (eg. Nginx_)
 to allow secure private access to the packages.
 
 
@@ -129,11 +129,12 @@ And then simply run,
 License
 -------
 
-MIT (See `LICENSE <./LICENSE>`_)
+MIT (See `LICENSE <./LICENSE.txt>`_)
 
 
 .. _PyPI: https://pypi.org/
 .. _AWS S3: https://aws.amazon.com/s3/
+.. _Nginx: http://nginx.org/
 .. _pip: https://pypi.org/project/pip/
 .. _virtualenv: https://virtualenv.pypa.io/
 .. _PEP 503: https://www.python.org/dev/peps/pep-0503/
