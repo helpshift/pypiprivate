@@ -1,43 +1,67 @@
 pypiprivate
 ===========
 
-``pypiprivate`` is a bunch of command line utilities for hosting a
-private pypi-like package index or in other words, a `manual python
+``pypiprivate`` is a command line tool for hosting a private
+PyPI_-like package index or in other words, a `manual python
 repository
-<https://packaging.python.org/guides/hosting-your-own-index/>`_. At
-present it provides only one command line util to publish a package to
-a private repo but more utilities for package search and
-discoverability are coming soon.
+<https://packaging.python.org/guides/hosting-your-own-index/>`_ backed
+by a file based storage backend.
 
-It's implemented to support pluggable storage backends and the ones
-currently supported are S3 and Local file system.
+It's implemented in a way that the storage backends are pluggable. At
+present, only `AWS S3`_ and local file system are supported but more
+can be added in future.
 
-Very Important Note
--------------------
+The backend can be protected behind a HTTP reverse proxy (eg. Nginx)
+to allow secure private access to the packages.
 
-Although the name of the project is ``pypiprivate``, it's upto you to
-ensure that the access to the storage is really private, both
 
-1. the HTTP endpoint
-2. the underlying storage backend
+How it works?
+-------------
+
+At present ``pypiprivate`` comes with only one command to publish a
+package (more utilities for package search and discoverability are
+coming soon).
+
+A publish operation involves,
+
+1. Copying all the available package artifacts for a specific version
+   under the ``./dist`` directory to the storage backend
+
+2. Creating the index on the same storage backend
+
+The file structure created on the backend conforms to the "Simple
+Repository API" specification defined in `PEP 503`_.
+
+The files can now be served securely by a webserver eg. by setting up
+a Nginx reverse proxy.
+
+It's important to note that although the name of the project is
+``pypiprivate``, **it's upto you to ensure that the access to both,
+the storage and the index is really private**. If you are using S3 and
+Nginx, for example, then
+
+* package authors/owners will need read-write S3 creds to publish
+  packages
+* nginx will authenticate with S3 using read-only S3 creds and protect
+  the files via HTTP Basic authentication
+* package users will need HTTP Auth creds to install the packages
+  using pip
 
 
 Installation
 ------------
 
-This project has been published to our private repo (using
-itself!). So to install it, you'll need to specify it as a
-extra-index-url.
+``pypi-private`` can be installed using pip_ as follows,
 
 .. code-block:: bash
 
-    $ sudo pip install pypiprivate --extra-index-url=<get-this-from-ops>
+    $ pip install pypiprivate
 
-This will install a script ``pypi-private`` which will be available at
-PATH.
+After installation, a script ``pypi-private`` which will be available
+at ``PATH``.
 
-You may choose to install it in a virtualenv, but it's recommended to
-install it globally for all users (sudo required) so that it's less
+You may choose to install it in a virtualenv_, but it's recommended to
+install it globally for all users (using ``sudo``) so that it's less
 confusing to build and publish projects that need to use their own
 virtualenvs.
 
@@ -46,15 +70,15 @@ Configuration
 -------------
 
 ``pypiprivate`` requires it's own config file, the default location
-for which is ``~/.pypi-private.cfg``. This repo also contains the
-example config file ``example.pypi-private.cfg``, which can be copied
-the home directory and renamed to ``.pypi-private.cfg``.
+for which is ``~/.pypi-private.cfg``. This repo contains the example
+config file ``example.pypi-private.cfg``, which can be simply copied
+to the home directory and renamed to ``.pypi-private.cfg``.
 
-For `aws-s3` type of storage backend, two environment variables
+For ``aws-s3`` type of storage backend, two environment variables
 ``PP_S3_ACCESS_KEY`` and ``PP_S3_SECRET_KEY`` are required to be set
 besides the config. The advantage of excluding s3 credentials in
 config file are that (1) they are not stored in plain text and, (2)
-it's easier to switch between read-only/read-write keys.
+it's easier to switch between read-only/read-write keys
 
 
 Usage
@@ -64,7 +88,7 @@ First create the builds,
 
 .. code-block:: bash
 
-    $ python setup.py bdist_wheel
+    $ python setup.py sdist bdist_wheel
 
 Then to publish the built artifacts run,
 
@@ -78,3 +102,38 @@ For other options, run
 .. code-block:: bash
 
     $ pypi-private -h
+
+
+Fetching packages published using pypiprivate
+---------------------------------------------
+
+Run pip with the ``--extra-index-url`` option,
+
+.. code-block:: bash
+
+    $ pip install mypackage --extra-index-url=https://<user>:<password>@my.private.pypi.com
+
+Or, add the ``extra-index-url`` to pip config file at
+``~/.pip/pip.conf`` as follows ::
+
+    [install]
+    extra-index-url = https://<user>:<password>@my.private.pypi.com
+
+And then simply run,
+
+.. code-block:: bash
+
+    $ pip install mypackage
+
+
+License
+-------
+
+MIT (See `LICENSE <./LICENSE>`_)
+
+
+.. _PyPI: https://pypi.org/
+.. _AWS S3: https://aws.amazon.com/s3/
+.. _pip: https://pypi.org/project/pip/
+.. _virtualenv: https://virtualenv.pypa.io/
+.. _PEP 503: https://www.python.org/dev/peps/pep-0503/
