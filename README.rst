@@ -111,13 +111,13 @@ Run pip with the ``--extra-index-url`` option,
 
 .. code-block:: bash
 
-    $ pip install mypackage --extra-index-url=https://<user>:<password>@my.private.pypi.com
+    $ pip install mypackage --extra-index-url=https://<user>:<password>@my.private.pypi.com/simple
 
 Or, add the ``extra-index-url`` to pip config file at
 ``~/.pip/pip.conf`` as follows ::
 
     [install]
-    extra-index-url = https://<user>:<password>@my.private.pypi.com
+    extra-index-url = https://<user>:<password>@my.private.pypi.com/simple
 
 And then simply run,
 
