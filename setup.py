@@ -19,7 +19,7 @@ setup(
     version=version,
     author='Vineet Naik',
     author_email='vineet@helpshift.com',
-    url='http://helpshift.com',
+    url='https://github.com/helpshift/pypiprivate',
     license='MIT License',
     description='Private package management tool for Python projects',
     long_description=long_desc,
