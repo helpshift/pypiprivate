@@ -44,7 +44,8 @@ class LocalFileSystemStorage(Storage):
 
     @classmethod
     def from_config(cls, config):
-        return cls(config['base_path'])
+        storage_config = config.storage_config
+        return cls(storage_config['base_path'])
 
     def join_path(self, *args):
         return os.path.join(*args)
@@ -74,7 +75,7 @@ class LocalFileSystemStorage(Storage):
         # In LocalFileSystemStorage sync makes no sense
         return dest_path
 
-    def put_file(self, src, dest):
+    def put_file(self, src, dest, sync=False):
         dest_path = self.join_path(self.base_path, dest)
         self.ensure_dir(os.path.dirname(dest_path))
         shutil.copy(src, dest_path)
