@@ -1,0 +1,18 @@
+---
+# travis-ci config for pypiprivate
+
+language: python
+
+python:
+  - "2.7"
+  - "3.4"
+  - "3.6"
+
+install:
+  - if [ "$TRAVIS_PYTHON_VERSION" == "2.7" ]; then pip install mock; fi
+  - pip install pytest
+  - pip install .
+
+script: py.test -v
+
+sudo: false
