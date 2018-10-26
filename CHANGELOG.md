@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.3.2
+-----
+
+* Fixed local file system backend
+
+* Added travis config file
+
+
 0.3.1
 -----
 
