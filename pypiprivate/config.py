@@ -1,6 +1,9 @@
 import os
-from ConfigParser import SafeConfigParser
 
+try:
+    from ConfigParser import SafeConfigParser
+except ModuleNotFoundError:
+    from configparser import SafeConfigParser
 
 class Config(object):
 
