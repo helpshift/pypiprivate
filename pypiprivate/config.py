@@ -2,8 +2,9 @@ import os
 
 try:
     from ConfigParser import SafeConfigParser
-except ModuleNotFoundError:
+except ImportError:
     from configparser import SafeConfigParser
+
 
 class Config(object):
 
