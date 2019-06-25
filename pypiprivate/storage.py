@@ -176,7 +176,7 @@ class AWSS3Storage(Storage):
         dest_path = self.prefixed_path(dest)
         client = self.s3.meta.client
         logger.debug('Uploading file to s3: {0} -> {1}'.format(src, dest_path))
-        with open(src) as f:
+        with open(src, 'rb') as f:
             client.put_object(Bucket=self.bucket.name,
                               Key=dest_path,
                               Body=f,
