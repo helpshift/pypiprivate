@@ -5,22 +5,23 @@ try:
 except ImportError:
     from unittest import mock
 
+from pkg_resources import packaging
 import pytest
+
+
+Version = packaging.version.Version
 
 
 def test__filter_pkg_dists():
     dists = ['abc-0.1.0-py2-none-any.whl',
              'abc-0.1.0.tar.gz',
-             'abc-0.0.1.tar.gz']
-    filtered = list(pp._filter_pkg_dists(dists, 'abc', '0.1.0'))
+             'abc-0.0.1.tar.gz',
+             'abc-0.1.0b1.tar.gz']
+    filtered = list(pp._filter_pkg_dists(dists, 'abc', Version('0.1.0')))
     assert ['abc-0.1.0-py2-none-any.whl', 'abc-0.1.0.tar.gz'] == filtered
-    # Test to confirm that _filter_pkg_dists is naive in the way that
-    # it doesn't work for pre-release semvers
-    dists.append('abc-0.1.0rc1-py2-none-any.whl')
-    filtered = list(pp._filter_pkg_dists(dists, 'abc', '0.1.0'))
-    assert ['abc-0.1.0-py2-none-any.whl',
-            'abc-0.1.0.tar.gz',
-            'abc-0.1.0rc1-py2-none-any.whl'] == filtered
+
+    filtered = list(pp._filter_pkg_dists(dists, 'abc', Version('0.1.0-beta1')))
+    assert ['abc-0.1.0b1.tar.gz'] == filtered
 
 
 def test_find_pkg_dists():
@@ -95,7 +96,7 @@ def test_publish_package():
 
     pp.publish_package('abc', '0.1.0', storage, '.', 'dist')
 
-    pp.find_pkg_dists.assert_called_once_with('.', 'dist', 'abc', '0.1.0')
+    pp.find_pkg_dists.assert_called_once_with('.', 'dist', 'abc', Version('0.1.0'))
     assert pp.upload_dist.call_count == 2
     assert pp.upload_dist.call_args_list[0][0] == (storage, d1)
     assert pp.upload_dist.call_args_list[1][0] == (storage, d2)
@@ -120,7 +121,7 @@ def test_publish_package():
 
     pp.publish_package('abc', '0.1.0', storage, '.', 'dist')
 
-    pp.find_pkg_dists.assert_called_once_with('.', 'dist', 'abc', '0.1.0')
+    pp.find_pkg_dists.assert_called_once_with('.', 'dist', 'abc', Version('0.1.0'))
     assert pp.upload_dist.call_count == 1
     assert pp.upload_dist.call_args_list[0][0] == (storage, d2)
     pp.update_pkg_index.assert_called_once_with(storage, 'abc')
@@ -137,7 +138,7 @@ def test_publish_package():
 
     pp.publish_package('abc', '0.1.0', storage, '.', 'dist')
 
-    pp.find_pkg_dists.assert_called_once_with('.', 'dist', 'abc', '0.1.0')
+    pp.find_pkg_dists.assert_called_once_with('.', 'dist', 'abc', Version('0.1.0'))
     assert pp.upload_dist.call_count == 0
     assert pp.update_pkg_index.call_count == 0
     assert pp.update_root_index.call_count == 0

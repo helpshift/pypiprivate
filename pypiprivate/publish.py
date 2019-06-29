@@ -2,6 +2,7 @@ import os
 import re
 import logging
 
+from pkg_resources import packaging
 from jinja2 import Environment
 
 
@@ -21,9 +22,8 @@ def normalized_name(name):
 
 
 def _filter_pkg_dists(dists, pkg_name, pkg_ver):
-    pkg_ver_str = re.sub('-', '_', pkg_ver)
-    prefix = '{0}-{1}'.format(pkg_name, pkg_ver_str)
-    return (d for d in dists if d.startswith(prefix))
+    regexp = re.compile(r'{0}-{1}[.-]'.format(pkg_name, pkg_ver))
+    return filter(regexp.match, dists)
 
 
 def find_pkg_dists(project_path, dist_dir, pkg_name, pkg_ver):
@@ -92,6 +92,7 @@ def update_root_index(storage):
 
 
 def publish_package(name, version, storage, project_path, dist_dir):
+    version = packaging.version.Version(version)
     dists = find_pkg_dists(project_path, dist_dir, name, version)
     if not dists:
         raise DistNotFound((
