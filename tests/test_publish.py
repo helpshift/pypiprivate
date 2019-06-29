@@ -27,20 +27,39 @@ def test_find_pkg_dists():
     project_path = '/tmp/abc'
     with mock.patch('os.listdir') as mock_fn:
         mock_fn.return_value = ['abc-0.1.0-py2-none-any.whl',
-                                'abc-0.1.0.tar.gz']
+                                'abc-0.1.0.tar.gz',
+                                'FooBar-3.2.0.tar.gz',
+                                'Bat_baz-1.8.4-py2-none-any.whl']
         result = list(pp.find_pkg_dists(project_path, 'dist', 'abc', '0.1.0'))
         expected = [{'pkg': 'abc',
+                     'normalized_name': 'abc',
                      'artifact': 'abc-0.1.0-py2-none-any.whl',
                      'path': '/tmp/abc/dist/abc-0.1.0-py2-none-any.whl'},
                     {'pkg': 'abc',
+                     'normalized_name': 'abc',
                      'artifact': 'abc-0.1.0.tar.gz',
                      'path': '/tmp/abc/dist/abc-0.1.0.tar.gz'}]
         assert expected == result
-        mock_fn.assert_called_once_with('/tmp/abc/dist')
+
+        result = list(pp.find_pkg_dists(project_path, 'dist', 'FooBar', '3.2.0'))
+        expected = [{'pkg': 'FooBar',
+                     'normalized_name': 'foobar',
+                     'artifact': 'FooBar-3.2.0.tar.gz',
+                     'path': '/tmp/abc/dist/FooBar-3.2.0.tar.gz'}]
+        assert expected == result
+
+        result = list(pp.find_pkg_dists(project_path, 'dist', 'Bat_baz', '1.8.4'))
+        expected = [{'pkg': 'Bat_baz',
+                     'normalized_name': 'batbaz',
+                     'artifact': 'Bat_baz-1.8.4.tar.gz',
+                     'path': '/tmp/abc/dist/Bat_baz-1.8.4.tar.gz'}]
+
+        mock_fn.assert_called_with('/tmp/abc/dist')
 
 
 def test_upload_dist():
     dist = {'pkg': 'abc',
+            'normalized_name': 'abc',
             'artifact': 'abc-0.1.0.tar.gz',
             'path': '/tmp/abc/dist/abc-0.1.0.tar.gz'}
     storage = mock.MagicMock()
@@ -54,10 +73,12 @@ def test_upload_dist():
 def test_publish_package():
     storage = 'dummy-storage'
 
-    d1 = {'pkg': 'abc', 'artifact':
-          'abc-0.1.0-py2-none-any.whl', 'path':
-          '/tmp/abc/dist/abc-0.1.0-py2-none-any.whl'}
+    d1 = {'pkg': 'abc',
+          'normalized_name': 'abc',
+          'artifact': 'abc-0.1.0-py2-none-any.whl',
+          'path': '/tmp/abc/dist/abc-0.1.0-py2-none-any.whl'}
     d2 = {'pkg': 'abc',
+          'normalized_name': 'abc',
           'artifact': 'abc-0.1.0.tar.gz',
           'path': '/tmp/abc/dist/abc-0.1.0.tar.gz'}
     pkg_dists = [d1, d2]

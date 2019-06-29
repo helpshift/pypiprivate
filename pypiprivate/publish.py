@@ -12,6 +12,14 @@ class DistNotFound(Exception):
     pass
 
 
+def normalized_name(name):
+    """Convert the project name to normalized form as per PEP-0503
+
+    Refer: https://www.python.org/dev/peps/pep-0503/#id4
+    """
+    return re.sub(r"[-_.]+", "-", name).lower()
+
+
 def _filter_pkg_dists(dists, pkg_name, pkg_ver):
     pkg_ver_str = re.sub('-', '_', pkg_ver)
     prefix = '{0}-{1}'.format(pkg_name, pkg_ver_str)
@@ -23,7 +31,8 @@ def find_pkg_dists(project_path, dist_dir, pkg_name, pkg_ver):
     logger.info('Looking for package dists in {0}'.format(dist_dir))
     dists = _filter_pkg_dists(os.listdir(dist_dir), pkg_name, pkg_ver)
     dists = [{'pkg': pkg_name,
-             'artifact': f,
+              'normalized_name': normalized_name(pkg_name),
+              'artifact': f,
               'path': os.path.join(dist_dir, f)}
              for f in dists]
     return dists
@@ -53,14 +62,14 @@ def build_index(title, items, index_type='root'):
 
 
 def is_dist_published(storage, dist):
-    path = storage.join_path(dist['pkg'], dist['artifact'])
+    path = storage.join_path(dist['normalized_name'], dist['artifact'])
     logger.info('Ensuring dist is not already published: {0}'.format(path))
     return storage.path_exists(path)
 
 
 def upload_dist(storage, dist):
     logger.info('Uploading dist: {0}'.format(dist['artifact']))
-    dest = storage.join_path(dist['pkg'], dist['artifact'])
+    dest = storage.join_path(dist['normalized_name'], dist['artifact'])
     storage.put_file(dist['path'], dest, sync=True)
 
 
