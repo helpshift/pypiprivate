@@ -2,6 +2,7 @@ import os
 import argparse
 import logging
 
+from . import __version__
 from .config import Config
 from .storage import load_storage
 from .publish import publish_package
@@ -35,6 +36,8 @@ def main():
     parser = argparse.ArgumentParser(description=(
         'Script for publishing python package on private pypi'
     ))
+    parser.add_argument('--version', action='version',
+                        version=__version__)
     parser.add_argument('-p', '--project-path', default='.',
                         help='Path to project [Default: current dir]')
     parser.add_argument('-c', '--conf-path', default='~/.pypi-private.cfg',
@@ -56,6 +59,10 @@ def main():
 
     logging.getLogger('pypiprivate').setLevel(log_level(args.verbose))
 
-    args.func(args)
+    try:
+        args.func(args)
+    except AttributeError:
+        parser.print_help()
+        return 1
 
     return 0
