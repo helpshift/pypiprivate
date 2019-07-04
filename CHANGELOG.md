@@ -1,6 +1,23 @@
 Changelog
 =========
 
+0.4.0
+-----
+
+* Fixed importing of configparser with Python 3 (PR #1)
+
+* Fixed a bug related to uploading tar.gz files to s3 (PR #2)
+
+* Added a CLI option to display the installed version
+
+* Fixed project name in upload path as per PEP-503 (Issue #3)
+
+* The tool is now fully compatible with PEP-440 which ensures that the
+  artifacts for the given version are correctly identified and
+  uploaded. This changed requires `setuptools` to be added as a
+  project dependency.
+
+
 0.3.2
 -----
 

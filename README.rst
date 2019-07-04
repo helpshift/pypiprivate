@@ -18,6 +18,10 @@ to allow secure private access to the packages.
 How it works?
 -------------
 
+Update: We have published a blog post that explains the usage,
+approach and rationale in detail - `Private Python Package Index with
+Zero Hassle`_.
+
 At present ``pypiprivate`` comes with only one command to publish a
 package (more utilities for package search and discoverability are
 coming soon).
@@ -138,3 +142,4 @@ MIT (See `LICENSE <./LICENSE.txt>`_)
 .. _pip: https://pypi.org/project/pip/
 .. _virtualenv: https://virtualenv.pypa.io/
 .. _PEP 503: https://www.python.org/dev/peps/pep-0503/
+.. _Private Python Package Index with Zero Hassle: https://medium.com/helpshift-engineering/private-python-package-index-with-zero-hassle-6164e3831208
