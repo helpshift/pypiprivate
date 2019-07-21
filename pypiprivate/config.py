@@ -8,10 +8,13 @@ except ImportError:
 
 class Config(object):
 
-    def __init__(self, path, env):
+    def __init__(self, path, env, env_interpolation=False):
         self.path = os.path.expanduser(path)
         self.env = env
-        self.c = SafeConfigParser()
+        if env_interpolation:
+            self.c = SafeConfigParser(env)
+        else:
+            self.c = SafeConfigParser()
         with open(self.path) as f:
             self.c.readfp(f)
 

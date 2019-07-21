@@ -23,7 +23,7 @@ def log_level(verbosity):
 
 
 def cmd_publish(args):
-    config = Config(args.conf_path, os.environ)
+    config = Config(args.conf_path, os.environ, args.env_interpolation)
     storage = load_storage(config)
     return publish_package(args.pkg_name,
                            args.pkg_ver,
@@ -42,6 +42,8 @@ def main():
                         help='Path to project [Default: current dir]')
     parser.add_argument('-c', '--conf-path', default='~/.pypi-private.cfg',
                         help='Path to config [Default: ~/.pypi-private.cfg]')
+    parser.add_argument('-i', '--env-interpolation', action='store_true',
+                        help='Make env variables accessible in config file.')
     parser.add_argument('-v', '--verbose', default=1, action='count')
 
     subparsers = parser.add_subparsers(help='subcommand help')
