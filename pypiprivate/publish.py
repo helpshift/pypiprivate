@@ -114,7 +114,7 @@ def publish_package(name, version, storage, project_path, dist_dir):
             ).format(dist['artifact']))
     if rebuild_index:
         logger.info('Updating index')
-        update_pkg_index(storage, name)
+        update_pkg_index(storage, dist['normalized_name'])
         update_root_index(storage)
     else:
         logger.debug('No index update required as no new dists uploaded')
