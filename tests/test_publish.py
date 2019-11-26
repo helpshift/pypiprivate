@@ -29,9 +29,15 @@ def test__filter_hyphenated_pkg_dists():
     # Wheels and sdists have different naming conventions for hyphenated package names
     # this checks that filtering works for both
     dists = ['a_bc-0.1.0-py2-none-any.whl',
-             'a-bc-0.1.0.tar.gz']
+             'a-bc-0.1.0.tar.gz',
+             'a_b_c-0.1.0-cp37-cp37m-linux_x86_64.whl',
+             'a-b-c-0.1.0.tar.gz']
     filtered = list(pp._filter_pkg_dists(dists, 'a-bc', '0.1.0'))
     assert ['a_bc-0.1.0-py2-none-any.whl', 'a-bc-0.1.0.tar.gz'] == filtered
+
+    filtered = list(pp._filter_pkg_dists(dists, 'a-b-c', '0.1.0'))
+    assert ['a_b_c-0.1.0-cp37-cp37m-linux_x86_64.whl', 'a-b-c-0.1.0.tar.gz'] == filtered
+
 
 def test_find_pkg_dists():
     project_path = '/tmp/abc'
