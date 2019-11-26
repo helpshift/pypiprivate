@@ -5,11 +5,13 @@ import logging
 from pkg_resources import packaging
 from jinja2 import Environment
 
+
 logger = logging.getLogger(__name__)
 
 
 class DistNotFound(Exception):
     pass
+
 
 def normalized_name(name):
     """Convert the project name to normalized form as per PEP-0503
