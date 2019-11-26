@@ -22,7 +22,13 @@ def normalized_name(name):
 
 
 def _filter_pkg_dists(dists, pkg_name, pkg_ver):
-    regexp = re.compile(r'{0}-{1}[.-]'.format(pkg_name, pkg_ver))
+    # Wheels have different naming conventions: https://www.python.org/dev/peps/pep-0491/#escaping-and-unicode
+    # We want to account for both sdist and wheel naming.
+    wheel_name = re.sub(r"[^\w\d.]+", "_", pkg_name, re.UNICODE)
+    pkg_name_candidates = (pkg_name, wheel_name)
+    pkg_ver = re.escape(str(pkg_ver))
+    name_re_alternation = '|'.join((re.escape(candidate) for candidate in pkg_name_candidates))
+    regexp = re.compile(r'({0})-{1}[.-]'.format(name_re_alternation, pkg_ver))
     return filter(regexp.match, dists)
 
 
@@ -110,7 +116,7 @@ def publish_package(name, version, storage, project_path, dist_dir):
             ).format(dist['artifact']))
     if rebuild_index:
         logger.info('Updating index')
-        update_pkg_index(storage, name)
+        update_pkg_index(storage, dist['normalized_name'])
         update_root_index(storage)
     else:
         logger.debug('No index update required as no new dists uploaded')
