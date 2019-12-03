@@ -90,9 +90,10 @@ class LocalFileSystemStorage(Storage):
 class AWSS3Storage(Storage):
 
     def __init__(self, bucket, creds, acl, prefix=None):
-        access_key, secret_key = creds
+        access_key, secret_key, session_token = creds
         session = boto3.Session(aws_access_key_id=access_key,
-                                aws_secret_access_key=secret_key)
+                                aws_secret_access_key=secret_key,
+                                aws_session_token=session_token)
         self.s3 = s3 = session.resource('s3')
         self.bucket = s3.Bucket(bucket)
         self.prefix = prefix
@@ -105,7 +106,7 @@ class AWSS3Storage(Storage):
         bucket = storage_config['bucket']
         prefix = storage_config.get('prefix')
         acl = storage_config.get('acl', 'private')
-        creds = (env['PP_S3_ACCESS_KEY'], env['PP_S3_SECRET_KEY'])
+        creds = (env['PP_S3_ACCESS_KEY'], env['PP_S3_SECRET_KEY'], env.get('PP_S3_SESSION_TOKEN', None))
         return cls(bucket, creds, acl, prefix)
 
     def join_path(self, *args):
