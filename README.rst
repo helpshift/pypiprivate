@@ -78,11 +78,8 @@ for which is ``~/.pypi-private.cfg``. This repo contains the example
 config file ``example.pypi-private.cfg``, which can be simply copied
 to the home directory and renamed to ``.pypi-private.cfg``.
 
-For ``aws-s3`` type of storage backend, two environment variables
-``PP_S3_ACCESS_KEY`` and ``PP_S3_SECRET_KEY`` are required to be set
-besides the config. The advantage of excluding s3 credentials in
-config file are that (1) they are not stored in plain text and, (2)
-it's easier to switch between read-only/read-write keys
+For ``aws-s3`` type of storage backend, set environment variables
+as required by AWS CLI.
 
 
 Usage
