@@ -89,12 +89,9 @@ class LocalFileSystemStorage(Storage):
 
 class AWSS3Storage(Storage):
 
-    def __init__(self, bucket, creds, acl, prefix=None,
+    def __init__(self, bucket, acl, prefix=None,
                  endpoint=None, region=None):
-        access_key, secret_key, session_token = creds
-        session = boto3.Session(aws_access_key_id=access_key,
-                                aws_secret_access_key=secret_key,
-                                aws_session_token=session_token)
+        session = boto3.Session()
         self.endpoint = endpoint
         self.region = region
         kwargs = dict()
@@ -110,15 +107,12 @@ class AWSS3Storage(Storage):
     @classmethod
     def from_config(cls, config):
         storage_config = config.storage_config
-        env = config.env
         bucket = storage_config['bucket']
         prefix = storage_config.get('prefix')
         acl = storage_config.get('acl', 'private')
         endpoint = storage_config.get('endpoint', None)
         region = storage_config.get('region', None)
-        creds = (env['PP_S3_ACCESS_KEY'], env['PP_S3_SECRET_KEY'], env.get('PP_S3_SESSION_TOKEN', None))
-        return cls(bucket, creds, acl, prefix=prefix, endpoint=endpoint,
-                   region=region)
+        return cls(bucket, acl, prefix=prefix, endpoint=endpoint, region=region)
 
     def join_path(self, *args):
         return '/'.join(args)
