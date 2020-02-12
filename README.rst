@@ -82,7 +82,10 @@ For ``aws-s3`` type of storage backend, two environment variables
 ``PP_S3_ACCESS_KEY`` and ``PP_S3_SECRET_KEY`` are required to be set
 besides the config. The advantage of excluding s3 credentials in
 config file are that (1) they are not stored in plain text and, (2)
-it's easier to switch between read-only/read-write keys
+it's easier to switch between read-only/read-write keys.
+
+You can also set the ``PP_S3_SESSION_TOKEN`` environment variable,
+if your S3 credentials require it.
 
 
 Usage
