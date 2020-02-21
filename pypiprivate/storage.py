@@ -89,12 +89,20 @@ class LocalFileSystemStorage(Storage):
 
 class AWSS3Storage(Storage):
 
-    def __init__(self, bucket, creds, acl, prefix=None):
+    def __init__(self, bucket, creds, acl, prefix=None,
+                 endpoint=None, region=None):
         access_key, secret_key, session_token = creds
         session = boto3.Session(aws_access_key_id=access_key,
                                 aws_secret_access_key=secret_key,
                                 aws_session_token=session_token)
-        self.s3 = s3 = session.resource('s3')
+        self.endpoint = endpoint
+        self.region = region
+        kwargs = dict()
+        if endpoint is not None:
+            kwargs['endpoint_url'] = endpoint
+        if region is not None:
+            kwargs['region_name'] = region
+        self.s3 = s3 = session.resource('s3', **kwargs)
         self.bucket = s3.Bucket(bucket)
         self.prefix = prefix
         self.acl = acl
@@ -106,8 +114,11 @@ class AWSS3Storage(Storage):
         bucket = storage_config['bucket']
         prefix = storage_config.get('prefix')
         acl = storage_config.get('acl', 'private')
+        endpoint = storage_config.get('endpoint', None)
+        region = storage_config.get('region', None)
         creds = (env['PP_S3_ACCESS_KEY'], env['PP_S3_SECRET_KEY'], env.get('PP_S3_SESSION_TOKEN', None))
-        return cls(bucket, creds, acl, prefix)
+        return cls(bucket, creds, acl, prefix=prefix, endpoint=endpoint,
+                   region=region)
 
     def join_path(self, *args):
         return '/'.join(args)
