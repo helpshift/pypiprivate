@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.5.0
+-----
+
+* Add trailing slash to package directory links at the root index.  Useful, for example,
+  with nginx proxy configurations, such as using the `ngx_aws_auth` module, where
+  directory paths can't be detected by the server.
+
 0.4.0
 -----
 

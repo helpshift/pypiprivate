@@ -53,11 +53,14 @@ class LocalFileSystemStorage(Storage):
     def listdir(self, path):
         path = self.join_path(self.base_path, path)
         try:
-            return os.listdir(path)
+            entries = os.listdir(path)
         except OSError as e:
             if e.errno == errno.ENOENT:
                 raise PathNotFound('Path {0} not found'.format(path))
             raise e
+        return [
+            ('{}/'.format(entry) if os.path.isdir(entry) else entry)
+            for entry in entries]
 
     def path_exists(self, path):
         path = self.join_path(self.base_path, path)
@@ -150,7 +153,7 @@ class AWSS3Storage(Storage):
             raise PathNotFound('Path {0} not found'.format(s3_prefix))
         files = (c['Key'][len(s3_prefix):] for c in file_objs)
         files = [f for f in files if f != '']
-        dirs = [cp['Prefix'][len(s3_prefix):].rstrip('/') for cp in dir_objs]
+        dirs = [cp['Prefix'][len(s3_prefix):] for cp in dir_objs]
         return files + dirs
 
     def path_exists(self, path):
