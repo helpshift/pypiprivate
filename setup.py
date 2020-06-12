@@ -7,7 +7,8 @@ from setuptools import setup
 _version_re = re.compile(r'__version__\s+=\s+(.*)')
 
 with open('pypiprivate/__init__.py', 'rb') as f:
-    version = str(ast.literal_eval(_version_re.search(f.read().decode('utf-8')).group(1)))
+    version = str(ast.literal_eval(
+        _version_re.search(f.read().decode('utf-8')).group(1)))
 
 
 with open('./README.rst') as f:
@@ -25,7 +26,7 @@ setup(
     long_description=long_desc,
     install_requires=['setuptools>=36.0.0',
                       'Jinja2==2.11.2',
-                      'boto3==1.5.27'],
+                      'boto3==1.14.1'],
     packages=['pypiprivate'],
     entry_points={
         'console_scripts': [
