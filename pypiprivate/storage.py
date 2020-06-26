@@ -36,6 +36,9 @@ class Storage(object):
     def put_file(self, src, dest, sync=False):
         raise NotImplementedError
 
+    def read_contents(self, dest, raise_if_not_exist=True):
+        raise NotImplementedError
+
 
 class LocalFileSystemStorage(Storage):
 
@@ -80,6 +83,16 @@ class LocalFileSystemStorage(Storage):
         self.ensure_dir(os.path.dirname(dest_path))
         shutil.copy(src, dest_path)
         return dest_path
+
+    def read_contents(self, dest, raise_if_not_exist=True):
+        dest_path = self.join_path(self.base_path, dest)
+        try:
+            with open(dest_path, 'r') as f:
+                return f.read()
+        except FileNotFoundError:
+            if raise_if_not_exist:
+                raise
+            return None
 
     def __repr__(self):
         return (
@@ -197,6 +210,18 @@ class AWSS3Storage(Storage):
         if sync:
             waiter = client.get_waiter('object_exists')
             waiter.wait(Bucket=self.bucket.name, Key=dest_path)
+
+    def read_contents(self, dest, raise_if_not_exist=True):
+        dest = self.prefixed_path(dest)
+        try:
+            s3_object = self.s3.meta.client.get_object(
+                Bucket=self.bucket.name, Key=dest)
+            return s3_object['Body'].read().decode('utf-8')
+        except ClientError:
+            if raise_if_not_exist:
+                raise FileNotFoundError(
+                    'No such file or directory: {0}'.format(dest))
+            return None
 
     def __repr__(self):
         return (
