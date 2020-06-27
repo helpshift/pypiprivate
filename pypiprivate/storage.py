@@ -89,9 +89,17 @@ class LocalFileSystemStorage(Storage):
 
 class AWSS3Storage(Storage):
 
-    def __init__(self, bucket, acl, prefix=None,
+    def __init__(self, bucket, acl, creds=None, prefix=None,
                  endpoint=None, region=None):
-        session = boto3.Session()
+        if creds:
+            logger.info('S3 Auth: using explicitly passed credentials')
+            access_key, secret_key, session_token = creds
+            session = boto3.Session(aws_access_key_id=access_key,
+                                    aws_secret_access_key=secret_key,
+                                    aws_session_token=session_token)
+        else:
+            logger.info('S3 Auth: using default boto3 methods')
+            session = boto3.Session()
         self.endpoint = endpoint
         self.region = region
         kwargs = dict()
@@ -107,12 +115,29 @@ class AWSS3Storage(Storage):
     @classmethod
     def from_config(cls, config):
         storage_config = config.storage_config
+        env = config.env
         bucket = storage_config['bucket']
         prefix = storage_config.get('prefix')
         acl = storage_config.get('acl', 'private')
         endpoint = storage_config.get('endpoint', None)
         region = storage_config.get('region', None)
-        return cls(bucket, acl, prefix=prefix, endpoint=endpoint, region=region)
+        # Following 2 are the required env vars for s3 auth. If any of
+        # these are not set, we try using the default boto3 methods
+        # (same as the ones that AWS CLI and other tools support)
+        pp_cred_keys = ['PP_S3_ACCESS_KEY', 'PP_S3_SECRET_KEY']
+        if all([(k in env) for k in pp_cred_keys]):
+            logger.debug('PP_* env vars found: using them for auth')
+            creds = (env['PP_S3_ACCESS_KEY'],
+                     env['PP_S3_SECRET_KEY'],
+                     env.get('PP_S3_SESSION_TOKEN', None))
+        else:
+            logger.debug((
+                'PP_* env vars not found: '
+                'Falling back to default methods supported by boto3'
+            ))
+            creds = None
+        return cls(bucket, acl, creds=creds, prefix=prefix,
+                   endpoint=endpoint, region=region)
 
     def join_path(self, *args):
         return '/'.join(args)
