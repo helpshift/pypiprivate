@@ -78,8 +78,19 @@ for which is ``~/.pypi-private.cfg``. This repo contains the example
 config file ``example.pypi-private.cfg``, which can be simply copied
 to the home directory and renamed to ``.pypi-private.cfg``.
 
-For ``aws-s3`` type of storage backend, set environment variables
-as required by AWS CLI.
+The config file is **NOT** meant for specifying the auth
+credentials. Instead, they should be set as environment
+variables. This to ensure that creds are not stored in plain text.
+
+Which env vars are to be set depends on the backend. More
+documentation about it can be found in the example config file.
+
+AWS S3
+~~~~~~
+
+- ``PP_S3_ACCESS_KEY``: required
+- ``PP_S3_SECRET_KEY``: required
+- ``PP_S3_SESSION_TOKEN``: optional
 
 
 Usage
