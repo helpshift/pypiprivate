@@ -8,6 +8,7 @@ tmp/
 .env/
 .cache/
 .coverage
+coverage.xml
 htmlcov/
 .pytest_cache/
 .tox/
