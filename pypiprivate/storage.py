@@ -11,6 +11,12 @@ from botocore.exceptions import ClientError
 logger = logging.getLogger(__name__)
 
 
+def guess_content_type(path, default='application/octet-stream'):
+    ctype = mimetypes.guess_type(path)[0] or default
+    logger.debug('Guessed ctype of "{0}": "{1}"'.format(path, ctype))
+    return ctype
+
+
 class StorageException(Exception):
     pass
 
@@ -184,12 +190,6 @@ class AWSS3Storage(Storage):
         else:
             return True
 
-    @staticmethod
-    def _guess_content_type(path, default='application/octet-stream'):
-        ctype = mimetypes.guess_type(path)[0] or default
-        logger.debug('Guessed ctype of "{0}": "{1}"'.format(path, ctype))
-        return ctype
-
     def put_contents(self, contents, dest, sync=False):
         dest_path = self.prefixed_path(dest)
         client = self.s3.meta.client
@@ -197,7 +197,7 @@ class AWSS3Storage(Storage):
         client.put_object(Bucket=self.bucket.name,
                           Key=dest_path,
                           Body=contents.encode('utf-8'),
-                          ContentType=self._guess_content_type(dest),
+                          ContentType=guess_content_type(dest),
                           ACL=self.acl)
         if sync:
             waiter = client.get_waiter('object_exists')
@@ -211,7 +211,7 @@ class AWSS3Storage(Storage):
             client.put_object(Bucket=self.bucket.name,
                               Key=dest_path,
                               Body=f,
-                              ContentType=self._guess_content_type(dest),
+                              ContentType=guess_content_type(dest),
                               ACL=self.acl)
         if sync:
             waiter = client.get_waiter('object_exists')
@@ -228,5 +228,8 @@ def load_storage(config):
         return LocalFileSystemStorage.from_config(config)
     elif config.storage == 'aws-s3':
         return AWSS3Storage.from_config(config)
+    elif config.storage == 'azure':
+        from pypiprivate.azure import AzureBlobStorage
+        return AzureBlobStorage.from_config(config)
     else:
         raise ValueError('Unsupported storage "{0}"'.format(config.storage))

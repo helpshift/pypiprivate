@@ -14,6 +14,13 @@ with open('./README.rst') as f:
     long_desc = f.read()
 
 
+extras_require = {
+    'azure': [
+        'azure-storage-blob==12.2.0'
+    ]
+}
+
+
 setup(
     name='pypiprivate',
     version=version,
@@ -26,6 +33,7 @@ setup(
     install_requires=['setuptools>=36.0.0',
                       'Jinja2==2.10.0',
                       'boto3==1.5.27'],
+    extras_require=extras_require,
     packages=['pypiprivate'],
     entry_points={
         'console_scripts': [
