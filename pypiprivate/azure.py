@@ -48,11 +48,10 @@ class AzureBlobStorage(Storage, AzureBlobClientMixin):
     @classmethod
     def from_config(cls, config):
         storage_config = config.storage_config
-        env = config.env
         container = storage_config['container']
-        connection_string = storage_config.get('connection_string') or env['AZURE_CONNECTION_STRING']
+        conn_str = config.env['PP_AZURE_CONN_STR']
         prefix = storage_config.get('prefix')
-        return cls(connection_string, container, prefix=prefix)
+        return cls(conn_str, container, prefix=prefix)
 
     def join_path(self, *args):
         return '/'.join(args)

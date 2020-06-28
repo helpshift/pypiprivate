@@ -108,6 +108,15 @@ For S3 there are 2 ways to specify the credentials
    ``~/.pypi-private.cfg`` file.
 
 
+AZURE
+~~~~~
+
+*Since version: to be released*
+
+- ``PP_AZURE_CONN_STR``: (required) Connection string of the storage
+  account
+
+
 Usage
 -----
 
