@@ -61,6 +61,17 @@ Installation
 
     $ pip install pypiprivate
 
+This will install pypiprivate with the additional dependency of
+``boto3`` for AWS S3 (compatible) backend.
+
+In last master (to be released), Azure backend is also supported. If
+you wish to use that then for now you'll need to additionally install the
+``azure-storage-blob`` package
+
+.. code-block:: bash
+
+    $ pip install azure-storage-blob==12.2.0
+
 After installation, a script ``pypi-private`` which will be available
 at ``PATH``.
 
