@@ -92,19 +92,20 @@ For S3 there are 2 ways to specify the credentials
 
 1. Setting ``PP_S3_*`` env vars explicitly
 
-- ``PP_S3_ACCESS_KEY``: required
-- ``PP_S3_SECRET_KEY``: required
-- ``PP_S3_SESSION_TOKEN``: optional
+   - ``PP_S3_ACCESS_KEY``: required
+   - ``PP_S3_SECRET_KEY``: required
+   - ``PP_S3_SESSION_TOKEN``: optional
 
 2. `Configuration methods supported by Boto3`_
 
-*Since version: to be released*
+   *Since version: to be released*
 
-This method is implicit but more convenient if you already use tools
-such as AWS-CLI_. It'd also allow you to use profiles. However, note
-that only credentials will be picked up for the configured
-profile. The ``region`` and ``endpoint`` (if required) need to
-explicitly configured in the ``~/.pypi-private.cfg`` file.
+   This method is implicit but more convenient if you already use
+   tools such as AWS-CLI_. It'd also allow you to use
+   profiles. However, note that only credentials will be picked up for
+   the configured profile. The ``region`` and ``endpoint`` (if
+   required) need to explicitly configured in the
+   ``~/.pypi-private.cfg`` file.
 
 
 Usage
