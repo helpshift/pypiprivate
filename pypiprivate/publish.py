@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import hashlib
 
 from pkg_resources import packaging
 from jinja2 import Environment
@@ -19,6 +20,18 @@ def normalized_name(name):
     Refer: https://www.python.org/dev/peps/pep-0503/#id4
     """
     return re.sub(r"[-_.]+", "-", name).lower()
+
+
+def sha256sum(filename):
+    h = hashlib.sha256()
+    b = bytearray(128 * 1024)
+    mv = memoryview(b)
+
+    with open(filename, 'rb', buffering=0) as f:
+        for n in iter(lambda: f.readinto(mv), 0):
+            h.update(mv[:n])
+
+    return h.hexdigest()
 
 
 def _filter_pkg_dists(dists, pkg_name, pkg_ver):
@@ -56,7 +69,10 @@ def build_index(title, items, index_type='root'):
     <h1>{{title}}</h1>
     {% endif -%}
     {% for item in items %}
-    <a href="{{item}}">{{item}}</a><br>
+    <a href="{{item["name"]}}#{%- if item.get("sha256") %}sha256={{item["sha256"]}}{% endif -%}">
+        {{item["name"]}}
+    </a>
+    <br>
     {% endfor %}
 </body>
 </html>
@@ -77,11 +93,24 @@ def upload_dist(storage, dist):
     logger.info('Uploading dist: {0}'.format(dist['artifact']))
     dest = storage.join_path(dist['normalized_name'], dist['artifact'])
     storage.put_file(dist['path'], dest, sync=True)
+    content_hash = sha256sum(dist['path'])
+    logger.info('{0} sha256: {1}'.format(dist['artifact'], content_hash))
+    storage.put_contents(content_hash, dest + '.sha256', sync=True)
 
 
 def update_pkg_index(storage, pkg_name):
     logger.info('Updating index for package: {0}'.format(pkg_name))
-    dists = [d for d in storage.listdir(pkg_name) if d != 'index.html']
+    dists = [
+        {
+            "name": d,
+            "sha256": storage.read_contents(
+                storage.join_path(pkg_name, d) + '.sha256',
+                raise_if_not_exist=False
+            )
+        }
+        for d in storage.listdir(pkg_name)
+        if d != 'index.html' and not d.endswith('.sha256')
+    ]
     title = 'Links for {0}'.format(pkg_name)
     index = build_index(title, dists, 'pkg')
     index_path = storage.join_path(pkg_name, 'index.html')
@@ -90,7 +119,10 @@ def update_pkg_index(storage, pkg_name):
 
 def update_root_index(storage):
     logger.info('Updating repository index')
-    pkgs = sorted([p for p in storage.listdir('.') if p != 'index.html'])
+    pkgs = sorted(
+        [{"name": p} for p in storage.listdir('.') if p != 'index.html'],
+        key=lambda x: x["name"]
+    )
     title = 'Private Index'
     index = build_index(title, pkgs, 'root')
     index_path = storage.join_path('index.html')
