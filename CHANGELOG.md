@@ -1,6 +1,21 @@
 Changelog
 =========
 
+0.5.0
+-----
+
+* DigitalOcean suport (PR #4)
+
+* A fix for hyphenated package names (PR #5)
+
+* Support for AWS session tokens (PR #6)
+
+* Support for default boto3 configuration methods (PR #7) in a
+  backward compatible manner.
+
+* Azure BlobStorage support (PR #9)
+
+
 0.4.0
 -----
 
