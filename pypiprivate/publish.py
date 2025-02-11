@@ -8,6 +8,7 @@ from jinja2 import Environment
 
 logger = logging.getLogger(__name__)
 
+INDEX_HTML = 'index.html'
 
 class DistNotFound(Exception):
     pass
@@ -61,7 +62,7 @@ def build_index(title, items, index_type='root'):
 </body>
 </html>
 """
-    env = Environment()
+    env = Environment(autoescape=True)
     template = env.from_string(tmpl)
     return template.render(title=title, items=items,
                            index_type=index_type)
@@ -81,19 +82,19 @@ def upload_dist(storage, dist):
 
 def update_pkg_index(storage, pkg_name):
     logger.info('Updating index for package: {0}'.format(pkg_name))
-    dists = [d for d in storage.listdir(pkg_name) if d != 'index.html']
+    dists = [d for d in storage.listdir(pkg_name) if d != INDEX_HTML]
     title = 'Links for {0}'.format(pkg_name)
     index = build_index(title, dists, 'pkg')
-    index_path = storage.join_path(pkg_name, 'index.html')
+    index_path = storage.join_path(pkg_name, INDEX_HTML)
     storage.put_contents(index, index_path)
 
 
 def update_root_index(storage):
     logger.info('Updating repository index')
-    pkgs = sorted([p for p in storage.listdir('.') if p != 'index.html'])
+    pkgs = sorted([p for p in storage.listdir('.') if p != INDEX_HTML])
     title = 'Private Index'
     index = build_index(title, pkgs, 'root')
-    index_path = storage.join_path('index.html')
+    index_path = storage.join_path(INDEX_HTML)
     storage.put_contents(index, index_path)
 
 
