@@ -12,3 +12,8 @@ coverage.xml
 htmlcov/
 .pytest_cache/
 .tox/
+
+# sonarqube
+.reports/
+.coverage
+.scannerwork/
