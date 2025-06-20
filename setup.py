@@ -16,7 +16,7 @@ with open('./README.rst') as f:
 
 extras_require = {
     'azure': [
-        'azure-storage-blob==12.2.0'
+        'azure-storage-blob==12.25.1'
     ]
 }
 
