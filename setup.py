@@ -31,7 +31,7 @@ setup(
     description='Private package management tool for Python projects',
     long_description=long_desc,
     install_requires=['setuptools>=36.0.0',
-                      'Jinja2==2.10.0',
+                      'Jinja2==3.1.6',
                       'boto3==1.5.27'],
     extras_require=extras_require,
     packages=['pypiprivate'],
